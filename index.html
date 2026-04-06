@@ -342,14 +342,18 @@ function xhrRequest(method, path, body){
     xhr.setRequestHeader('Authorization', 'Bearer ' + SB_KEY);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Prefer', 'return=representation');
+    xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+    xhr.withCredentials = false;
     xhr.onload = () => {
       if(xhr.status >= 200 && xhr.status < 300){
         try{ resolve(JSON.parse(xhr.responseText)); }catch{ resolve([]); }
       } else {
-        reject(new Error('HTTP ' + xhr.status + ': ' + xhr.responseText));
+        reject(new Error('HTTP ' + xhr.status + ': ' + xhr.responseText.slice(0,200)));
       }
     };
-    xhr.onerror = () => reject(new Error('XHR network error'));
+    xhr.onerror = () => reject(new Error('XHR network error — status: ' + xhr.status));
+    xhr.ontimeout = () => reject(new Error('XHR timeout'));
+    xhr.timeout = 10000;
     xhr.send(body ? JSON.stringify(body) : null);
   });
 }
@@ -468,14 +472,14 @@ async function getAnalisis(titulo,desc,cats){
 
 // ── DATOS ──
 const CAT_INFO={suds:{label:'Drenaje sostenible',color:'#2e8fd4'},bio:{label:'Biodiversidad',color:'#00c4e0'},espacio:{label:'Espacio público',color:'#1aad7a'},edu:{label:'Educación ambiental',color:'#5ab3e8'},riesgo:{label:'Gestión del riesgo',color:'#c8a96e'},comunidad:{label:'Comunidad',color:'#a0d0f0'}};
-// Imágenes base con URLs estables de Wikimedia (carga inmediata, sin IA)
+// Imágenes base con Unsplash (permite hotlinking sin restricciones)
 const IMGS_BASE = {
-  b1: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Rain_garden_at_Pierce_County_Library%2C_Bethel.jpg/640px-Rain_garden_at_Pierce_County_Library%2C_Bethel.jpg',
-  b2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/White-tailed_Trogon_JCB.jpg/640px-White-tailed_Trogon_JCB.jpg',
-  b3: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Paseo_del_R%C3%ADo_Medellin.jpg/640px-Paseo_del_R%C3%ADo_Medellin.jpg',
-  b4: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Flickr_-_Nicholas_T_-_Environmental_Education_%281%29.jpg/640px-Flickr_-_Nicholas_T_-_Environmental_Education_%281%29.jpg',
-  b5: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Permeable_interlocking_concrete_pavement.jpg/640px-Permeable_interlocking_concrete_pavement.jpg',
-  b6: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Constructed_wetland_horizontal_flow.JPG/640px-Constructed_wetland_horizontal_flow.JPG',
+  b1: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=640&q=80',
+  b2: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=640&q=80',
+  b3: 'https://images.unsplash.com/photo-1519121785383-3229633bb75b?w=640&q=80',
+  b4: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=640&q=80',
+  b5: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=640&q=80',
+  b6: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=640&q=80',
 };
 
 const PROPS_BASE=[
