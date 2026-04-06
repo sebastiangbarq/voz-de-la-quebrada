@@ -514,7 +514,7 @@ async function renderGaleria(){
 
   // Cargar propuestas de Supabase
   let sbProps=[];
-  try{ sbProps=await sbGet('propuestas','select=*'); if(!Array.isArray(sbProps))sbProps=[]; }catch{}
+  try{ sbProps = await sbGetAll('propuestas'); }catch{}
 
   // Combinar: base + supabase
   let todas=[...PROPS_BASE,...sbProps];
