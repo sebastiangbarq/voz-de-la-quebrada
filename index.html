@@ -370,11 +370,10 @@ async function sbInsert(table, data){
   return xhrRequest('POST', `/rest/v1/${table}`, data);
 }
 async function sbUpdate(table, id, data){
-  // Usar texto literal con comillas para IDs con caracteres especiales
-  return xhrRequest('PATCH', `/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, data);
+  return xhrRequest('PATCH', `/rest/v1/${table}?id=eq."${id}"`, data);
 }
 async function sbDelete(table, filters){
-  const qs = Object.entries(filters).map(([k,v])=>`${k}=eq.${encodeURIComponent(v)}`).join('&');
+  const qs = Object.entries(filters).map(([k,v])=>`${k}=eq."${v}"`).join('&');
   return xhrRequest('DELETE', `/rest/v1/${table}?${qs}`, null);
 }
 
@@ -503,9 +502,9 @@ let misVotos={}; // {propuesta_id: true}
 // ── CARGAR VOTOS DE ESTA SESIÓN ──
 async function cargarMisVotos(){
   try{
-    const data=await sbGet('votos',`session_id=eq.${SESSION_ID}&select=propuesta_id`);
+    const data = await xhrRequest('GET', `/rest/v1/votos?select=propuesta_id&session_id=eq."${SESSION_ID}"`, null);
     if(Array.isArray(data)) data.forEach(v=>{ misVotos[v.propuesta_id]=true; });
-  }catch{}
+  }catch(e){ console.warn('cargarMisVotos:', e.message); }
 }
 
 // ── RENDER GALERÍA ──
