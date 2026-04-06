@@ -359,21 +359,19 @@ function xhrRequest(method, path, body){
 }
 
 async function sbGet(table, filters={}){
-  let qs = Object.entries(filters).map(([k,v])=>`${k}=eq.${encodeURIComponent(v)}`).join('&');
+  const qs = Object.entries(filters).map(([k,v])=>`${k}=eq.${encodeURIComponent(v)}`).join('&');
   const path = `/rest/v1/${table}?select=*&order=created_at.desc${qs?'&'+qs:''}`;
   try {
     const data = await xhrRequest('GET', path, null);
     return Array.isArray(data) ? data : [];
-  } catch(e) {
-    console.warn('sbGet error:', e.message);
-    return [];
-  }
+  } catch(e) { console.warn('sbGet error:', e.message); return []; }
 }
 async function sbInsert(table, data){
   return xhrRequest('POST', `/rest/v1/${table}`, data);
 }
 async function sbUpdate(table, id, data){
-  return xhrRequest('PATCH', `/rest/v1/${table}?id=eq.${id}`, data);
+  // Usar texto literal con comillas para IDs con caracteres especiales
+  return xhrRequest('PATCH', `/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, data);
 }
 async function sbDelete(table, filters){
   const qs = Object.entries(filters).map(([k,v])=>`${k}=eq.${encodeURIComponent(v)}`).join('&');
@@ -461,13 +459,21 @@ function mostrarImagen(src, cid){
   intentar();
 }
 
-// ── ANÁLISIS IA ──
-async function getAnalisis(titulo,desc,cats){
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:`Eres experto en urbanismo ecológico y quebradas urbanas en Medellín.\n\nPropuesta: "${titulo}"\nDescripción: "${desc}"\nCategorías: ${cats.length?cats.join(', '):'general'}\n\nResponde SOLO JSON sin markdown:\n{"analisis":"(100 palabras español: valor para la quebrada, 2-3 beneficios ecosistémicos, acción concreta)","promptImagen":"(30 palabras inglés: escena visual watercolor, plantas agua elementos urbanos)"}`}]})});
-    const data=await res.json();
-    return JSON.parse((data.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim());
-  }catch{return{analisis:`La propuesta "${titulo}" plantea una intervención valiosa para la Quebrada Santa Elena.`,promptImagen:titulo};}
+// ── ANÁLISIS LOCAL (sin API externa — evita CORS en Vercel) ──
+const BENEFICIOS = {
+  suds: 'regula la escorrentía urbana, reduce inundaciones y recarga el acuífero local',
+  bio: 'recupera corredores ecológicos, atrae polinizadores y fauna riparia nativa',
+  espacio: 'transforma la ronda en lugar de encuentro, fortalece identidad territorial',
+  edu: 'genera conciencia sobre servicios ecosistémicos y conecta comunidad con la quebrada',
+  riesgo: 'reduce vulnerabilidad ante eventos torrenciales y mejora la resiliencia urbana',
+  comunidad: 'fortalece vínculos sociales y la apropiación colectiva de la ronda hídrica',
+};
+async function getAnalisis(titulo, desc, cats){
+  const cat = cats[0] || 'comunidad';
+  const ben = BENEFICIOS[cat] || BENEFICIOS.comunidad;
+  const analisis = `La propuesta "${titulo}" tiene alto valor para la Quebrada Santa Elena porque ${ben}. ${desc} Esta intervención contribuye directamente a la adaptación climática urbana y a la recuperación del corredor ecológico de la cuenca, fortaleciendo los servicios ecosistémicos para las comunidades de las comunas Buenos Aires y Villa Hermosa.`;
+  const promptImagen = `${titulo} urban stream ecological intervention Medellín riparian watercolor`;
+  return { analisis, promptImagen };
 }
 
 // ── DATOS ──
@@ -587,7 +593,7 @@ async function publicar(){
   mostrarNotif('Guardando…');
   try{
     const payload={
-      id: pendingProp.id,
+      id: 'prop' + Date.now() + Math.floor(Math.random()*1000),
       titulo: pendingProp.titulo,
       descr: pendingProp.descr || '',
       analisis: pendingProp.analisis || '',
