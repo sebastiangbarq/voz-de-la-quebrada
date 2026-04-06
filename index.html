@@ -334,7 +334,7 @@ button,a,[onclick],.cat-tag,.tab-btn,.submit-btn,.g-pill,.like-btn,.tool-btn,.cd
 const SB_URL = 'https://sachcppnbtyvthlzmlij.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhY2hjcHBuYnR5dnRobHptbGlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTQ5OTQsImV4cCI6MjA5MTA3MDk5NH0.UcFEhA0nsEFWyceH0PIKMsR0tiMUVwnNxlhmXQQHf9w';
 
-function xhr(method, path, body){
+function xhrRequest(method, path, body){
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(method, SB_URL + path);
@@ -360,7 +360,7 @@ function xhr(method, path, body){
 
 async function sbGet(table, filters={}){
   const qs = Object.entries(filters).map(([k,v])=>`${k}=eq.${encodeURIComponent(v)}`).join('&');
-  const path = `/rest/v1/${table}?select=id,titulo,descr,analisis,autor,cat,cat_label,color,img_url,likes,fecha${qs?'&'+qs:''}`;
+  const path = `/rest/v1/${table}?select=*&order=created_at.desc${qs?'&'+qs:''}`;
   try {
     const data = await xhrRequest('GET', path, null);
     return Array.isArray(data) ? data : [];
