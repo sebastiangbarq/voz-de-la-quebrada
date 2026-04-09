@@ -540,9 +540,9 @@ async function enviarPropuesta(){
   const ph=document.getElementById('ia-placeholder'),ld=document.getElementById('ia-loading'),rs=document.getElementById('ia-result');
   ph.style.display='none';rs.style.display='none';ld.classList.add('show');
   try{
-    const{analisis,promptImagen}=await getAnalisis(titulo,desc,catsActive);
+    const {analisis} = await getAnalisis(titulo, desc, catsActive);
+    const cat = catsActive[0] || 'comunidad', info = CAT_INFO[cat] || CAT_INFO.comunidad;
     const imgUrl = await generarImagen(titulo, desc, cat, txt => { ld.querySelector('.loader-txt').textContent = txt; });
-    const cat=catsActive[0]||'comunidad',info=CAT_INFO[cat]||CAT_INFO.comunidad;
     const fecha=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'});
     pendingProp={titulo,descr:desc,autor,analisis,img_url:imgUrl,cat,cat_label:info.label,color:info.color,likes:0,fecha};
     ld.classList.remove('show');rs.style.display='block';
