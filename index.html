@@ -636,19 +636,16 @@ async function initMapa(){
       sources:{
         'base':{
           type:'raster',
-          tiles:['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png','https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
-          tileSize:256
-        },
-        'agua':{
-          type:'raster',
-          tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-          tileSize:256
+          tiles:[
+            'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+          ],
+          tileSize:256,
+          attribution:'© CartoDB © OpenStreetMap'
         }
       },
-      layers:[
-        {id:'base-layer',type:'raster',source:'base',minzoom:0,maxzoom:22},
-        {id:'agua-layer',type:'raster',source:'agua',minzoom:0,maxzoom:22,paint:{'raster-opacity':0.3,'raster-saturation':0.8,'raster-hue-rotate':180}}
-      ]
+      layers:[{id:'base-layer',type:'raster',source:'base',minzoom:0,maxzoom:22}]
     },
     center:[-75.5658,6.2476],
     zoom:13,
