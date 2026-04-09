@@ -498,7 +498,14 @@ async function getAnalisis(titulo,desc,cats){
 
 // ── DATOS BASE ──
 const CAT_INFO={suds:{label:'Drenaje sostenible',color:'#2e8fd4'},bio:{label:'Biodiversidad',color:'#00c4e0'},espacio:{label:'Espacio público',color:'#1aad7a'},edu:{label:'Educación ambiental',color:'#5ab3e8'},riesgo:{label:'Gestión del riesgo',color:'#c8a96e'},comunidad:{label:'Comunidad',color:'#a0d0f0'}};
-const IMGS={b1:'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=640&q=80',b2:'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=640&q=80',b3:'https://images.unsplash.com/photo-1519121785383-3229633bb75b?w=640&q=80',b4:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=640&q=80',b5:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=640&q=80',b6:'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=640&q=80'};
+const IMGS={
+  b1:'https://image.pollinations.ai/prompt/rain%20garden%20permeable%20urban%20stream%20Medellin%20Colombia%20tropical%20plants%20watercolor%20painting%20loose%20brushstrokes%20blue%20green%20tones%20no%20text%20no%20people?width=640&height=360&seed=10101&nologo=true&enhance=true&model=flux',
+  b2:'https://image.pollinations.ai/prompt/native%20bird%20corridor%20yarumo%20heliconia%20guamo%20riparian%20forest%20Medellin%20quebrada%20watercolor%20painting%20botanical%20illustration%20no%20text%20no%20people?width=640&height=360&seed=20202&nologo=true&enhance=true&model=flux',
+  b3:'https://image.pollinations.ai/prompt/urban%20pedestrian%20promenade%20tropical%20stream%20Medellin%20linear%20park%20watercolor%20painting%20blue%20green%20tones%20no%20text%20no%20people?width=640&height=360&seed=30303&nologo=true&enhance=true&model=flux',
+  b4:'https://image.pollinations.ai/prompt/ecological%20educational%20signage%20urban%20stream%20quebrada%20Medellin%20watercolor%20illustration%20hand%20painted%20botanical%20no%20text%20no%20people?width=640&height=360&seed=40404&nologo=true&enhance=true&model=flux',
+  b5:'https://image.pollinations.ai/prompt/permeable%20pavement%20bioswale%20urban%20drainage%20tropical%20stream%20Medellin%20watercolor%20painting%20blue%20tones%20no%20text%20no%20people?width=640&height=360&seed=50505&nologo=true&enhance=true&model=flux',
+  b6:'https://image.pollinations.ai/prompt/constructed%20wetland%20phytodepuration%20vetiver%20papyrus%20heliconia%20tropical%20Medellin%20quebrada%20watercolor%20painting%20loose%20brushstrokes%20no%20text%20no%20people?width=640&height=360&seed=60606&nologo=true&enhance=true&model=flux',
+};
 const PROPS_BASE=[
   {id:'b1',cat:'suds',cat_label:'Drenaje sostenible',color:'#2e8fd4',titulo:'Jardines de lluvia en la ronda hídrica',descr:'Franja de jardines permeables que capturan la escorrentía antes de llegar a la quebrada.',autor:'María L.',likes:34,img_url:IMGS.b1,fecha:'10/03/2025'},
   {id:'b2',cat:'bio',cat_label:'Biodiversidad',color:'#00c4e0',titulo:'Corredor de aves nativas',descr:'Restauración de la vegetación de ribera con guamos, yarumos y heliconias.',autor:'Carlos V.',likes:28,img_url:IMGS.b2,fecha:'12/03/2025'},
