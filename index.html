@@ -378,14 +378,43 @@ document.addEventListener('mouseup',()=>dropCursor.classList.remove('click'));
   frame();
 })();
 
-// ── IMAGEN IA ──
-const ESTILO='watercolor illustration urban ecology Colombian Andes Medellín urban stream riparian landscape tropical vegetation hand-painted';
-function urlImg(concepto,seed){return'https://image.pollinations.ai/prompt/'+encodeURIComponent(concepto+'. '+ESTILO+'. No text no labels.')+'?width=640&height=360&seed='+seed+'&nologo=true&model=flux';}
-async function generarImagen(concepto,onProgress){
-  const seed=Math.floor(Math.random()*999999);
-  if(onProgress)onProgress('Generando ilustración acuarela…');
-  const url=urlImg(concepto,seed);
-  await new Promise(res=>{const img=new Image();img.onload=res;img.onerror=res;setTimeout(res,50000);img.src=url;});
+// ── IMAGEN IA — prompts contextualizados por categoría ──
+const ESTILO_BASE = 'loose watercolor painting botanical illustration warm earth tones deep blue Colombian Andes Medellín urban stream quebrada riparian landscape tropical vegetation hand-painted academic urban ecology no text no labels no people';
+
+const CONTEXTO_CAT = {
+  suds: 'rain garden permeable pavement bioswale urban drainage green infrastructure stream buffer zone infiltration tropical plants',
+  bio: 'native bird corridor yarumo heliconia guamo riparian forest biodiversity urban wildlife pollinators stream vegetation restoration',
+  espacio: 'pedestrian promenade linear park community space urban waterfront gathering place murals tropical trees stream edge',
+  edu: 'ecological signage interpretive panels community education urban nature stream ecosystem services awareness',
+  riesgo: 'flood risk management slope stabilization early warning urban resilience stream torrent risk reduction green infrastructure',
+  comunidad: 'community planting neighborhood participation urban garden stream stewardship collective action tropical plants',
+};
+
+function buildPrompt(titulo, desc, cat) {
+  const ctx = CONTEXTO_CAT[cat] || CONTEXTO_CAT.comunidad;
+  // Extraer palabras clave del título y descripción (primeras 8 palabras de la desc)
+  const palabras = desc.split(' ').slice(0, 8).join(' ');
+  return `${titulo} ${palabras} ${ctx} Medellín Colombia quebrada Santa Elena urban stream. ${ESTILO_BASE}`;
+}
+
+function urlImg(prompt, seed){
+  return 'https://image.pollinations.ai/prompt/'
+    + encodeURIComponent(prompt)
+    + '?width=640&height=360&seed=' + seed
+    + '&nologo=true&enhance=true&model=flux';
+}
+
+async function generarImagen(titulo, desc, cat, onProgress){
+  const seed = Math.floor(Math.random() * 999999);
+  const prompt = buildPrompt(titulo || 'ecological intervention', desc || '', cat || 'comunidad');
+  if(onProgress) onProgress('Generando ilustración acuarela…');
+  const url = urlImg(prompt, seed);
+  await new Promise(res => {
+    const img = new Image();
+    img.onload = res; img.onerror = res;
+    setTimeout(res, 50000);
+    img.src = url;
+  });
   return url;
 }
 function mostrarImagen(src,cid){
@@ -512,7 +541,7 @@ async function enviarPropuesta(){
   ph.style.display='none';rs.style.display='none';ld.classList.add('show');
   try{
     const{analisis,promptImagen}=await getAnalisis(titulo,desc,catsActive);
-    const imgUrl=await generarImagen(promptImagen||titulo,txt=>{ld.querySelector('.loader-txt').textContent=txt;});
+    const imgUrl = await generarImagen(titulo, desc, cat, txt => { ld.querySelector('.loader-txt').textContent = txt; });
     const cat=catsActive[0]||'comunidad',info=CAT_INFO[cat]||CAT_INFO.comunidad;
     const fecha=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'});
     pendingProp={titulo,descr:desc,autor,analisis,img_url:imgUrl,cat,cat_label:info.label,color:info.color,likes:0,fecha};
@@ -529,7 +558,7 @@ async function enviarBoceto(){
   pl.style.display='none';rs.style.display='none';ld.classList.add('show');
   const concepto=desc||'ecological urban intervention Medellín stream riparian vegetation';
   try{
-    const imgUrl=await generarImagen(concepto,txt=>{ld.querySelector('.loader-txt').textContent=txt;});
+    const imgUrl = await generarImagen(desc || 'ecological intervention quebrada', desc, 'comunidad', txt => { ld.querySelector('.loader-txt').textContent = txt; });
     const analisis=desc?'Tu boceto sobre "'+desc+'" propone una intervención que fortalece la resiliencia hídrica de la Quebrada Santa Elena.':'Intervención ecológica en la ronda de la quebrada.';
     const fecha=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'});
     pendingProp={titulo:desc||'Boceto participativo',descr:analisis,autor,analisis,img_url:imgUrl,cat:'comunidad',cat_label:'Comunidad',color:'#a0d0f0',likes:0,fecha};
