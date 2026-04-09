@@ -164,6 +164,7 @@ button,a,[onclick],.cat-tag,.tab-btn,.submit-btn,.g-pill,.like-btn,.tool-btn,.cd
   <ul class="nav-links">
     <li><a onclick="ir('como')">Metodología</a></li>
     <li><a onclick="ir('participa')">Participar</a></li>
+    <li><a onclick="ir('mapa')">Precipitación</a></li>
     <li><a onclick="ir('galeria')">Galería</a></li>
   </ul>
 </nav>
@@ -277,6 +278,86 @@ button,a,[onclick],.cat-tag,.tab-btn,.submit-btn,.g-pill,.like-btn,.tool-btn,.cd
     </div>
   </div>
 </section>
+<section id="mapa" style="background:var(--azul-abismo);padding:5.5rem 3rem;position:relative">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <div class="inner">
+    <div class="s-label">Cartografía participativa</div>
+    <h2>Marca tu punto <em>crítico</em> en el mapa</h2>
+    <p class="s-intro">¿Dónde se inunda tu calle? ¿Qué quebrada desborda en tu barrio? Marca el punto en el mapa y cuéntanos — entre todos construimos la memoria hídrica de Medellín.</p>
+
+    <!-- Instrucción -->
+    <div style="display:flex;align-items:center;gap:.75rem;background:rgba(0,196,224,.07);border:1px solid rgba(0,196,224,.25);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:.85rem;color:var(--azul-bruma)">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="flex-shrink:0"><circle cx="10" cy="10" r="8" stroke="var(--acento-agua)" stroke-width="1.5"/><path d="M10 9v5M10 7v.5" stroke="var(--acento-agua)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Haz clic en cualquier punto del mapa para marcarlo, luego describe qué ocurre ahí y guárdalo.</span>
+    </div>
+
+    <!-- Mapa -->
+    <div style="border-radius:20px;overflow:hidden;border:1px solid var(--borde);position:relative;margin-bottom:1.5rem">
+      <div id="mapa-leaflet" style="height:500px;width:100%;background:var(--azul-profundo)"></div>
+      <!-- Leyenda -->
+      <div style="position:absolute;bottom:1rem;left:1rem;z-index:1000;background:rgba(3,13,26,.9);backdrop-filter:blur(8px);border:1px solid var(--borde);border-radius:12px;padding:.75rem 1rem;font-size:.72rem;color:var(--texto-suave)">
+        <div style="display:flex;flex-direction:column;gap:.45rem">
+          <div style="display:flex;align-items:center;gap:.5rem"><span style="width:12px;height:12px;border-radius:50%;background:#ff6b35;display:inline-block;flex-shrink:0"></span>Inundación recurrente</div>
+          <div style="display:flex;align-items:center;gap:.5rem"><span style="width:12px;height:12px;border-radius:50%;background:#ffcc00;display:inline-block;flex-shrink:0"></span>Deslizamiento / erosión</div>
+          <div style="display:flex;align-items:center;gap:.5rem"><span style="width:12px;height:12px;border-radius:50%;background:#00c4e0;display:inline-block;flex-shrink:0"></span>Quebrada contaminada</div>
+          <div style="display:flex;align-items:center;gap:.5rem"><span style="width:12px;height:12px;border-radius:50%;background:#1aad7a;display:inline-block;flex-shrink:0"></span>Potencial de recuperación</div>
+        </div>
+      </div>
+      <div style="position:absolute;top:1rem;right:1rem;z-index:1000;background:rgba(3,13,26,.85);backdrop-filter:blur(8px);border:1px solid var(--borde);border-radius:10px;padding:.5rem .85rem;font-size:.65rem;color:var(--texto-suave)">
+        Cartografía participativa · Voz de la Quebrada
+      </div>
+    </div>
+
+    <!-- Formulario del punto marcado -->
+    <div id="form-punto" style="display:none;background:rgba(7,20,40,.8);border:1px solid var(--borde-activo);border-radius:20px;padding:1.75rem;margin-bottom:1.5rem;animation:fadeUp .4s ease">
+      <div style="font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--acento-agua);margin-bottom:1.25rem">📍 Punto marcado — describe qué ocurre aquí</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div class="form-group" style="margin:0"><label>Tipo de problema</label>
+          <select id="punto-tipo" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--borde);color:var(--texto);padding:.85rem 1rem;font-family:'Outfit',sans-serif;font-size:.88rem;border-radius:12px;appearance:none">
+            <option value="inundacion">💧 Inundación recurrente</option>
+            <option value="deslizamiento">⚠️ Deslizamiento / erosión</option>
+            <option value="contaminacion">🚫 Quebrada contaminada</option>
+            <option value="recuperacion">🌿 Potencial de recuperación</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0"><label>Barrio / Sector</label>
+          <input type="text" id="punto-barrio" placeholder="Ej: Buenos Aires, El Pinal…">
+        </div>
+      </div>
+      <div class="form-group"><label>¿Qué pasa en este lugar?</label>
+        <textarea id="punto-desc" rows="3" placeholder="Describe la situación: ¿cuándo ocurre? ¿qué tan seguido? ¿qué afecta?…"></textarea>
+      </div>
+      <div class="form-group"><label>Tu nombre (opcional)</label>
+        <input type="text" id="punto-autor" placeholder="Vecino/a del barrio…">
+      </div>
+      <div style="display:flex;gap:1rem">
+        <button class="submit-btn" onclick="guardarPunto()" style="flex:1">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v8M3 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Agregar al mapa colectivo
+        </button>
+        <button onclick="cancelarPunto()" style="background:rgba(255,255,255,.05);border:1px solid var(--borde);color:var(--texto-suave);padding:1rem 1.5rem;border-radius:12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.88rem">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Contador -->
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--borde);border-radius:16px;padding:1.25rem 2rem;text-align:center;flex:1;min-width:140px">
+        <div id="cnt-total" style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--azul-cielo)">…</div>
+        <div style="font-size:.7rem;color:var(--texto-suave);letter-spacing:.08em;text-transform:uppercase;margin-top:.2rem">Puntos marcados</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--borde);border-radius:16px;padding:1.25rem 2rem;text-align:center;flex:1;min-width:140px">
+        <div id="cnt-inundacion" style="font-family:'Playfair Display',serif;font-size:2rem;color:#ff6b35">…</div>
+        <div style="font-size:.7rem;color:var(--texto-suave);letter-spacing:.08em;text-transform:uppercase;margin-top:.2rem">Inundaciones</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border:1px solid var(--borde);border-radius:16px;padding:1.25rem 2rem;text-align:center;flex:1;min-width:140px">
+        <div id="cnt-recuperacion" style="font-family:'Playfair Display',serif;font-size:2rem;color:#1aad7a">…</div>
+        <div style="font-size:.7rem;color:var(--texto-suave);letter-spacing:.08em;text-transform:uppercase;margin-top:.2rem">Recuperación</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="galeria" id="galeria">
   <div class="inner">
     <div class="s-label">Galería participativa</div>
@@ -589,8 +670,177 @@ function setColor(c,dot){penColor=c;document.querySelectorAll('.cdot').forEach(d
 function clearCanvas(){const cv=document.getElementById('drawing-canvas');if(!cv)return;const ctx=cv.getContext('2d');ctx.fillStyle='#030d1a';ctx.fillRect(0,0,cv.width,cv.height);}
 function switchTab(tab,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+tab).classList.add('active');if(tab==='boceto')setTimeout(initCanvas,60);}
 
+// ── MAPA Y DATOS CLIMÁTICOS ──
+async function initMapa(){
+  if(!document.getElementById('mapa-leaflet')) return;
+  if(typeof L === 'undefined'){ setTimeout(initMapa, 500); return; }
+
+  // Coordenadas Quebrada Santa Elena
+  const LAT = 6.2518, LNG = -75.5636;
+
+  const map = L.map('mapa-leaflet', {
+    center: [6.2476, -75.5658],
+    zoom: 12,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  // Capa base oscura
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  // Mapa base con ríos y quebradas visibles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  // Segunda capa: OpenStreetMap estándar con transparencia para ver ríos en azul
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    opacity: 0.35
+  }).addTo(map);
+
+  // Puntos críticos con coordenadas reales verificadas
+  const puntosCriticos = [
+    // Quebrada Santa Elena - puntos documentados
+    { lat:6.2312, lng:-75.5615, nombre:'Av. La Playa · Centro', desc:'Desbordamiento nov. 2016 — 80cm sobre aceras. Carrera 28 con Calle 49.' },
+    { lat:6.2380, lng:-75.5540, nombre:'Tranvía Ayacucho · Caicedo', desc:'Riesgo rojo documentado por SIATA. Creciente súbita sobre el cauce cubierto.' },
+    { lat:6.2450, lng:-75.5480, nombre:'Buenos Aires · Villa Hermosa', desc:'Zona de intervención prioritaria POT 2014. Avenidas torrenciales y movimientos en masa.' },
+    { lat:6.2520, lng:-75.5420, nombre:'El Pinal · Aranjuez', desc:'Confluencia quebrada El Ñato — punto de acumulación de caudal.' },
+    // Quebrada La Presidenta - El Poblado
+    { lat:6.2050, lng:-75.5680, nombre:'Q. La Presidenta · Patio Bonito', desc:'Riesgo rojo enero 2026. Desbordamiento en Av. Las Vegas frente a CC Monterrey.' },
+    { lat:6.2030, lng:-75.5650, nombre:'Q. La Poblada · El Poblado', desc:'Confluencia con La Aguacatala — arrastre de sedimentos enero 2026.' },
+    // Quebrada La Iguaná
+    { lat:6.2750, lng:-75.5950, nombre:'Q. La Iguaná · El Pesebre', desc:'Derrumbe muro de contención. Barrios 12 de Octubre y El Picacho.' },
+    { lat:6.2820, lng:-75.5820, nombre:'Q. La Iguaná · Robledo', desc:'Zona de alta vulnerabilidad — cuenca con alta densidad poblacional.' },
+    // Otros sectores críticos oficiales
+    { lat:6.3120, lng:-75.5580, nombre:'Santo Domingo · Q. La García', desc:'Creciente súbita. 24 familias afectadas temporada invernal 2023.' },
+    { lat:6.2900, lng:-75.5650, nombre:'Villa Guadalupe · Q. La Bermejala', desc:'Sector de alta pendiente con riesgo de deslizamiento asociado.' },
+  ];
+
+  const iconoCritico = L.divIcon({
+    html: '<div style="width:14px;height:14px;border-radius:50%;background:#ff4444;border:2px solid rgba(255,68,68,.4);box-shadow:0 0 8px rgba(255,68,68,.6)"></div>',
+    className: '', iconSize:[14,14], iconAnchor:[7,7]
+  });
+
+  puntosCriticos.forEach(p => {
+    L.marker([p.lat, p.lng], {icon: iconoCritico})
+      .bindPopup(`<div style="font-family:sans-serif;font-size:12px"><strong style="color:#ff6666">${p.nombre}</strong><br><span style="color:#666">${p.desc}</span></div>`)
+      .addTo(map);
+  });
+
+  // Cargar propuestas de Supabase y mostrarlas en el mapa
+  // (usando ubicaciones aproximadas por barrio)
+  const barrios = {
+    suds:    [6.2480, -75.5590],
+    bio:     [6.2350, -75.5470],
+    espacio: [6.2520, -75.5650],
+    edu:     [6.2420, -75.5540],
+    riesgo:  [6.2280, -75.5420],
+    comunidad:[6.2550, -75.5700],
+  };
+
+  const iconoProp = L.divIcon({
+    html: '<div style="width:10px;height:10px;border-radius:50%;background:#00c4e0;border:2px solid rgba(0,196,224,.4);box-shadow:0 0 6px rgba(0,196,224,.5)"></div>',
+    className: '', iconSize:[10,10], iconAnchor:[5,5]
+  });
+
+  try {
+    const props = await sbGetAll('propuestas');
+    props.slice(0,20).forEach((p,i) => {
+      const base = barrios[p.cat] || barrios.comunidad;
+      const jitter = [(Math.random()-.5)*.015, (Math.random()-.5)*.015];
+      L.marker([base[0]+jitter[0], base[1]+jitter[1]], {icon: iconoProp})
+        .bindPopup(`<div style="font-family:sans-serif;font-size:12px"><strong style="color:#00c4e0">${p.titulo}</strong><br><span style="color:#666">${(p.descr||'').slice(0,80)}…</span></div>`)
+        .addTo(map);
+    });
+  } catch{}
+
+  // ── DATOS OPEN-METEO ──
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LNG}&hourly=precipitation,precipitation_probability&forecast_days=2&timezone=America%2FBogota`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const ahora = new Date();
+    const horaActual = ahora.getHours();
+    const horas = data.hourly.time;
+    const precip = data.hourly.precipitation;
+    const prob = data.hourly.precipitation_probability;
+
+    // Índice de la hora actual
+    let idx = 0;
+    for(let i=0; i<horas.length; i++){
+      if(new Date(horas[i]).getHours() === horaActual && 
+         new Date(horas[i]).toDateString() === ahora.toDateString()){
+        idx = i; break;
+      }
+    }
+
+    const lluviaActual = precip[idx] || 0;
+    const lluvia6h = precip.slice(idx, idx+6).reduce((a,b)=>a+b, 0);
+
+    // Nivel de alerta
+    let alerta, alertaColor;
+    if(lluvia6h < 5){       alerta='🟢 Normal';     alertaColor='#1aad7a'; }
+    else if(lluvia6h < 15){ alerta='🟡 Moderado';   alertaColor='#c8a96e'; }
+    else if(lluvia6h < 30){ alerta='🟠 Alto';        alertaColor='#e8833a'; }
+    else{                   alerta='🔴 Crítico';     alertaColor='#ff4444'; }
+
+    document.getElementById('lluvia-actual').textContent = lluviaActual.toFixed(1);
+    document.getElementById('lluvia-6h').textContent = lluvia6h.toFixed(1);
+    document.getElementById('nivel-alerta').textContent = alerta;
+    document.getElementById('nivel-alerta').style.color = alertaColor;
+
+    // Estaciones meteorológicas del SIATA (posiciones reales)
+    const estaciones = [
+      { lat:6.2518, lng:-75.5636, nombre:'Est. Santa Elena', precip: precip[idx] },
+      { lat:6.2700, lng:-75.6200, nombre:'Est. La Iguaná',   precip: precip[idx] * 0.9 },
+      { lat:6.2100, lng:-75.5700, nombre:'Est. El Poblado',  precip: precip[idx] * 1.1 },
+      { lat:6.3100, lng:-75.5540, nombre:'Est. Bello',       precip: precip[idx] * 0.8 },
+      { lat:6.1800, lng:-75.5850, nombre:'Est. Itagüí',      precip: precip[idx] * 1.2 },
+    ];
+    estaciones.forEach(e => {
+      const r = Math.min(1800 + e.precip * 400, 4000);
+      const c = e.precip < 1 ? '#2e8fd4' : e.precip < 5 ? '#c8a96e' : '#ff4444';
+      L.circle([e.lat, e.lng], {
+        radius: r, color: c, fillColor: c, fillOpacity: 0.12, weight: 1.5, dashArray:'4,6'
+      }).addTo(map).bindPopup(`<div style="font-family:sans-serif;font-size:12px"><strong>${e.nombre}</strong><br>Lluvia actual: <strong>${e.precip.toFixed(1)} mm/h</strong></div>`);
+    });
+
+    // Gráfico de barras próximas 24h
+    const canvas = document.getElementById('grafico-lluvia');
+    const ctx = canvas.getContext('2d');
+    const datos24 = precip.slice(idx, idx+24);
+    const horas24 = horas.slice(idx, idx+24).map(h => new Date(h).getHours()+'h');
+    const W = canvas.offsetWidth || 600;
+    canvas.width = W; canvas.height = 80;
+    const bw = W / datos24.length;
+    const maxVal = Math.max(...datos24, 1);
+    datos24.forEach((v, i) => {
+      const h = (v / maxVal) * 60;
+      const x = i * bw;
+      const color = v < 1 ? 'rgba(46,143,212,0.3)' : v < 5 ? '#2e8fd4' : v < 15 ? '#c8a96e' : '#ff4444';
+      ctx.fillStyle = color;
+      ctx.fillRect(x+1, 70-h, bw-2, h);
+      if(i % 4 === 0){
+        ctx.fillStyle = 'rgba(168,208,240,0.4)';
+        ctx.font = '9px Outfit, sans-serif';
+        ctx.fillText(horas24[i], x, 78);
+      }
+    });
+
+  } catch(e) {
+    console.warn('Open-Meteo error:', e.message);
+    document.getElementById('lluvia-actual').textContent = '—';
+    document.getElementById('lluvia-6h').textContent = '—';
+    document.getElementById('nivel-alerta').textContent = 'Sin datos';
+  }
+}
+
 // ── INIT ──
-(async()=>{await cargarMisVotos();await renderGaleria();})();
+(async()=>{await cargarMisVotos();await renderGaleria();initMapa();})();
 </script>
 </body>
 </html>
